@@ -28,9 +28,11 @@ from toml import loads
 def report(file, all, breakdown, exclude):
     """Print expense report."""
     with open(file, "r") as r:
-        parsed_input = loads(r.read())
+        data = loads(r.read())
 
-    expenses = parsed_input["expenses"]
+    budget = data["budget"] if "budget" in data.keys() else None
+    currency = data["currency"]
+    expenses = data["expenses"]
     if exclude:
         excludes = list()
         for expense in expenses:
@@ -38,14 +40,9 @@ def report(file, all, breakdown, exclude):
                 excludes.append(expense)
         for expense in excludes:
             expenses.remove(expense)
-    budget = parsed_input["budget"]
-    if "currency" in parsed_input.keys():
-        currency = parsed_input["currency"]
-    else:
-        currency = "€"
 
     cprint(
-        f"Expense Report for [{parsed_input['title']}]",
+        f"Expense Report for [{data['title']}]",
         "grey",
         "on_white"
     )
@@ -66,12 +63,18 @@ def report(file, all, breakdown, exclude):
         print("")
 
     total_expense = sum([_["cost"] for _ in expenses])
-    budget_left = budget - total_expense
-    budget_color = "green" if budget_left > 0 else "red"
+    if budget:
+        budget_left = budget - total_expense
+        budget_color = "green" if budget_left > 0 else "red"
+        budget_text = " ({} left)".format(
+            colored(f'{budget_left}{currency}', budget_color)
+        )
+    else:
+        budget_text = ""
     print(
-        "Total expense: {} ({} left)".format(
+        "Total expense: {}{}".format(
             colored(f"{total_expense}{currency}", "yellow"),
-            colored(f"{budget_left}{currency}", budget_color)
+            budget_text
         )
     )
 
