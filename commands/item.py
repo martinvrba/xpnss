@@ -48,12 +48,16 @@ def item(file, add_items, list_items, remove_items):
         continue_adding = "y"
         while continue_adding == "y":
             expense = input("Enter expense [item,category,cost]: ").split(",")
+            try:
+                cost = int(expense[2])
+            except ValueError:
+                cost = float(expense[2])
             data["expenses"].append(
                 {
                     "id": generate_id(),
                     "item": expense[0],
                     "category": expense[1],
-                    "cost": int(expense[2])
+                    "cost": cost
                 }
             )
             continue_adding = ""
