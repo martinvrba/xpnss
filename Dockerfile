@@ -1,12 +1,10 @@
 FROM debian:bullseye-slim
 
-RUN mkdir -p /app/commands; mkdir /app/output
+RUN apt-get update && apt-get install -y git python3-click python3-tabulate python3-termcolor python3-toml
 
-COPY commands /app/commands/
+RUN git clone --recurse-submodules https://github.com/martinvrba/xpnss.git /app
 
-COPY cli.py /app/
-
-RUN apt-get update && apt-get install -y python3-click python3-tabulate python3-termcolor python3-toml
+RUN mkdir /app/output
 
 WORKDIR /app/output
 
