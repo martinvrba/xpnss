@@ -1,9 +1,8 @@
 import click
 
-from operator import itemgetter
-from tabulate import tabulate
 from termcolor import colored, cprint
-from toml import loads
+
+from .lib import create_expense_table, load_data
 
 
 @click.command()
@@ -27,8 +26,7 @@ from toml import loads
 )
 def report(file, all, breakdown, exclude):
     """Print expense report."""
-    with open(file, "r") as r:
-        data = loads(r.read())
+    data = load_data(file)
 
     budget = data["budget"] if "budget" in data.keys() else None
     currency = data["currency"]
@@ -49,17 +47,16 @@ def report(file, all, breakdown, exclude):
     print("")
 
     if all:
-        table = list()
-        for expense in sorted(expenses, key=itemgetter("cost")):
-            table.append(
-                [
-                    expense["item"],
-                    expense["category"],
-                    f"{expense['cost']}{currency}"
-                ]
+        print(
+            create_expense_table(
+                data,
+                columns={
+                    "Item": "item",
+                    "Category": "category",
+                    "Cost": "cost"
+                }
             )
-
-        print(tabulate(table, headers=["Item", "Category", "Cost"]))
+        )
         print("")
 
     total_expense = sum([_["cost"] for _ in expenses])
@@ -80,12 +77,17 @@ def report(file, all, breakdown, exclude):
 
     if breakdown:
         print("")
-        for category in sorted(set([_["category"] for _ in expenses])):
+        for category in sorted(
+            set([expense["category"] for expense in expenses])
+        ):
             total_expense_for_category = sum(
-                [_["cost"] for _ in expenses if _["category"] == category]
+                [
+                    expense["cost"] \
+                    for expense in expenses \
+                    if expense["category"] == category
+                ]
             )
             print(
-                f"Total expense for [{category}]: " + colored(
-                    f"{total_expense_for_category}{currency}", "yellow"
-                )
+                f"Total expense for [{category}]: " + \
+                colored(f"{total_expense_for_category}{currency}", "yellow")
             )
