@@ -72,7 +72,9 @@ def item(file, add_items, list_items, remove_items):
                     "Item": "item",
                     "Category": "category",
                     "Cost": "cost"
-                }
+                },
+                sort_by="item",
+                reverse_sort=False
             )
         )
     elif remove_items:

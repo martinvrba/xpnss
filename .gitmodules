@@ -1,0 +1,3 @@
+[submodule "termgraph"]
+	path = termgraph
+	url = https://github.com/mkaz/termgraph.git

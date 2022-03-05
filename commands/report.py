@@ -1,9 +1,11 @@
 import click
 
 from operator import itemgetter
+from random import choice
 from termcolor import colored, cprint
 
 from .lib import create_expense_table, load_data
+from module import Data, BarChart, Args, Colors
 
 
 @click.command()
@@ -107,12 +109,46 @@ def report(file, all, breakdown, exclude, output_format):
         )
 
         if breakdown:
+            chart_values = list()
+            chart_legend = list()
+            available_colors = [
+                Colors.Blue, Colors.Cyan, Colors.Green,
+                Colors.Magenta, Colors.Red, Colors.Yellow
+            ]
+
             print("")
             for category in sorted(
                 expenses_by_category,
-                key=itemgetter("total_expense")
+                key=itemgetter("total_expense"),
+                reverse=True
             ):
                 print(
                     f"Total expense for [{category['name']}]: " + \
                     colored(f"{category['total_expense']}{currency}", "yellow")
                 )
+                if len(chart_legend) < len(available_colors):
+                    chart_values.append(category["total_expense"])
+                    chart_legend.append(category["name"])
+
+            chart_data = Data([chart_values], [""], chart_legend)
+            picked_colors = list()
+            for category in chart_legend:
+                color = choice(available_colors)
+                picked_colors.append(color)
+                available_colors.remove(color)
+            chart_legend_width = len("".join(chart_legend))
+            if chart_legend_width > 50:
+                chart_width = chart_legend_width
+            else:
+                chart_width = 50
+
+            chart = BarChart(
+                chart_data,
+                Args(
+                    colors=picked_colors,
+                    no_labels=True,
+                    width=chart_width
+                )
+            )
+            print("")
+            chart.draw()
