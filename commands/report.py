@@ -63,13 +63,13 @@ def report(file, all, breakdown, exclude, output_format):
             expenses_by_category.append(
                 {
                     "name": category,
-                    "total_expense": sum(
+                    "total_expense": round(sum(
                         [
                             expense["cost"]
                             for expense in expenses
                             if expense["category"] == category
                         ]
-                    )
+                    ), 2)
                 }
             )
 
