@@ -4,7 +4,7 @@ from random import choice
 from string import ascii_letters, digits
 from sys import exit
 
-from .lib import create_expense_table, load_data, save_data
+from .lib import create_expense_table, ItemCost, load_data, save_data
 
 
 def check_options(disallowed_options):
@@ -48,16 +48,12 @@ def item(file, add_items, list_items, remove_items):
         continue_adding = "y"
         while continue_adding == "y":
             expense = input("Enter expense [item,category,cost]: ").split(",")
-            try:
-                cost = int(expense[2])
-            except ValueError:
-                cost = float(expense[2])
             data["expenses"].append(
                 {
                     "id": generate_id(),
                     "item": expense[0],
                     "category": expense[1],
-                    "cost": cost
+                    "cost": ItemCost(expense[2], "").cost
                 }
             )
             continue_adding = ""

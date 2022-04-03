@@ -3,12 +3,30 @@ from tabulate import tabulate
 from toml import dumps, loads
 
 
+class ItemCost():
+    def __init__(self, cost, currency):
+        try:
+            self.cost = int(str(cost))
+        except ValueError:
+            self.cost = float(str(cost))
+        self.currency = currency
+
+    def __repr__(self):
+        if isinstance(self.cost, int):
+            return str(self.cost) + self.currency
+        else:
+            return "{:.2f}{}".format(
+                self.cost,
+                self.currency
+            ).replace(".", ",")
+
+
 def create_expense_table(
         data,
         columns=None,
         sort_by="cost",
         reverse_sort=True
-    ):
+):
     """Creates an expense table that can be printed in a terminal."""
     table = list()
     for expense in sorted(
@@ -18,8 +36,8 @@ def create_expense_table(
     ):
         table.append(
             [
-                f"{expense[column]}{data['currency']}" \
-                if column == "cost" else f"{expense[column]}" \
+                f"{ItemCost(expense[column], data['currency'])}"
+                if column == "cost" else f"{expense[column]}"
                 for column in columns.values()
             ]
         )

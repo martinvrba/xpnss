@@ -4,7 +4,7 @@ from operator import itemgetter
 from random import choice
 from termcolor import colored, cprint
 
-from .lib import create_expense_table, load_data
+from .lib import create_expense_table, ItemCost, load_data
 from module import Data, BarChart, Args, Colors
 
 
@@ -48,11 +48,11 @@ def report(file, all, breakdown, exclude, output_format):
         for expense in excludes:
             expenses.remove(expense)
 
-    total_expense = sum([expense["cost"] for expense in expenses])
+    total_expense = round(sum([expense["cost"] for expense in expenses]), 2)
 
     if "budget" in data.keys():
         budget = data["budget"]
-        budget_left = budget - total_expense
+        budget_left = round(budget - total_expense, 2)
     else:
         budget = None
 
@@ -65,8 +65,8 @@ def report(file, all, breakdown, exclude, output_format):
                     "name": category,
                     "total_expense": sum(
                         [
-                            expense["cost"] \
-                            for expense in expenses \
+                            expense["cost"]
+                            for expense in expenses
                             if expense["category"] == category
                         ]
                     )
@@ -79,7 +79,7 @@ def report(file, all, breakdown, exclude, output_format):
             "grey",
             "on_white"
         )
-        print("")
+        print("\n")
 
         if all:
             print(
@@ -92,18 +92,22 @@ def report(file, all, breakdown, exclude, output_format):
                     }
                 )
             )
-            print("")
+            print("\n")
 
         if budget:
             budget_color = "green" if budget_left > 0 else "red"
-            budget_text = " ({} left)".format(
-                colored(f'{budget_left}{currency}', budget_color)
+            budget_text = " ({}".format(
+                colored(
+                    f"{ItemCost(abs(budget_left), currency)}",
+                    budget_color
+                )
             )
+            budget_text += " left)" if budget_left > 0 else " over)"
         else:
             budget_text = ""
         print(
             "Total expense: {}{}".format(
-                colored(f"{total_expense}{currency}", "yellow"),
+                colored(f"{ItemCost(total_expense, currency)}", "yellow"),
                 budget_text
             )
         )
@@ -116,15 +120,18 @@ def report(file, all, breakdown, exclude, output_format):
                 Colors.Magenta, Colors.Red, Colors.Yellow
             ]
 
-            print("")
+            print("\n")
             for category in sorted(
                 expenses_by_category,
                 key=itemgetter("total_expense"),
                 reverse=True
             ):
                 print(
-                    f"Total expense for [{category['name']}]: " + \
-                    colored(f"{category['total_expense']}{currency}", "yellow")
+                    f"Total expense for [{category['name']}]: " +
+                    colored(
+                        f"{ItemCost(category['total_expense'], currency)}",
+                        "yellow"
+                    )
                 )
                 if len(chart_legend) < len(available_colors):
                     chart_values.append(category["total_expense"])
@@ -150,5 +157,5 @@ def report(file, all, breakdown, exclude, output_format):
                     width=chart_width
                 )
             )
-            print("")
+            print("\n")
             chart.draw()
